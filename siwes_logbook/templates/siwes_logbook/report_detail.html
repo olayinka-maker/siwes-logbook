@@ -1,0 +1,114 @@
+{% extends "siwes_logbook/base.html" %}
+
+{% block title %}Report: Week {{ report.week_number }} — SIWES Logbook{% endblock %}
+{% block page_title %}Weekly Report Details{% endblock %}
+
+{% block header_actions %}
+{% if request.user.profile.role == 'student' and report.status != 'approved' %}
+<a href="{% url 'edit_weekly_report' report.pk %}" class="btn btn-outline btn-sm"> Edit</a>
+{% endif %}
+<a href="{% url 'report_list' %}" class="btn btn-ghost btn-sm">← Back to Reports</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:900px;">
+    <div class="card">
+        <div class="card-body">
+            <!-- Header -->
+            <div class="detail-header">
+                <div>
+                    <h2 style="font-size:22px;margin-bottom:6px;">Week {{ report.week_number }} Report</h2>
+                    <div class="detail-meta">
+                        <span class="detail-meta-item"><span class="icon">📅</span> {{ report.start_date|date:"M d" }} — {{ report.end_date|date:"M d, Y" }}</span>
+                        {% if request.user.profile.role == 'supervisor' %}
+                        <span class="detail-meta-item"><span class="icon"></span> {{ report.student.get_full_name }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="badge badge-{{ report.status }}" style="font-size:14px;padding:6px 16px;">{{ report.get_status_display }}</span>
+            </div>
+
+            <!-- Summary -->
+            <div class="detail-section">
+                <h4> Weekly Summary</h4>
+                <p>{{ report.summary|linebreaksbr }}</p>
+            </div>
+
+            <!-- Achievements -->
+            {% if report.achievements %}
+            <div class="detail-section">
+                <h4> Key Achievements</h4>
+                <p>{{ report.achievements|linebreaksbr }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Problems -->
+            {% if report.problems_encountered %}
+            <div class="detail-section">
+                <h4> Problems Encountered</h4>
+                <p>{{ report.problems_encountered|linebreaksbr }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Plans -->
+            {% if report.plans_for_next_week %}
+            <div class="detail-section">
+                <h4> Plans for Next Week</h4>
+                <p>{{ report.plans_for_next_week|linebreaksbr }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Signatures -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;padding-top:20px;border-top:1px solid var(--gray-200);">
+                <div>
+                    <div class="text-small text-muted mb-1">Student Signature Date</div>
+                    <strong>{{ report.student_signature_date|date:"M d, Y"|default:"Not signed" }}</strong>
+                </div>
+                <div>
+                    <div class="text-small text-muted mb-1">Supervisor Signature Date</div>
+                    <strong>{{ report.supervisor_signature_date|date:"M d, Y"|default:"Not signed" }}</strong>
+                </div>
+            </div>
+
+            <!-- Supervisor Comment -->
+            {% if report.supervisor_comment %}
+            <div class="detail-section" style="background:var(--gray-50);border-radius:var(--radius-md);padding:20px;margin-top:20px;">
+                <h4> Supervisor Comment</h4>
+                <p>{{ report.supervisor_comment|linebreaksbr }}</p>
+                {% if report.reviewed_by %}
+                <p class="text-small text-muted mt-1">— {{ report.reviewed_by.get_full_name }}, {{ report.reviewed_at|date:"M d, Y H:i" }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Supervisor Review Panel -->
+    {% if review_form %}
+    <div class="review-panel">
+        <h3> Review This Report</h3>
+        <form method="post" id="review-report-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Decision</label>
+                <div class="radio-group">
+                    <label class="radio-option approve">
+                        <input type="radio" name="status" value="approved">  Approve
+                    </label>
+                    <label class="radio-option reject">
+                        <input type="radio" name="status" value="rejected">  Reject
+                    </label>
+                </div>
+                {{ review_form.status.errors }}
+            </div>
+            <div class="form-group">
+                <label for="id_supervisor_comment">Comment</label>
+                <textarea name="supervisor_comment" id="id_supervisor_comment" class="form-control" rows="4"
+                          placeholder="Add your comments here (required if rejecting)..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="submit-report-review-btn">Submit Review</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIWES Logbook System — Manage your industrial training logbook entries, weekly reports, and supervisor approvals.">
+    <title>{% block title %}SIWES Logbook{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% block body %}
+    <div class="app-shell">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-icon"></div>
+                <div>
+                    <h2>SIWES Logbook</h2>
+                    <small>Industrial Training System</small>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-section-title">Main Menu</div>
+                    <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" id="nav-dashboard">
+                        <span class="sidebar-link-icon"></span>
+                        Dashboard
+                    </a>
+                </div>
+
+                {% if request.user.profile.role == 'student' %}
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-section-title">Logbook</div>
+                    <a href="{% url 'create_entry' %}" class="sidebar-link {% if request.resolver_match.url_name == 'create_entry' %}active{% endif %}" id="nav-new-entry">
+                        <span class="sidebar-link-icon"></span>
+                        New Entry
+                    </a>
+                    <a href="{% url 'entry_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'entry_list' %}active{% endif %}" id="nav-entries">
+                        <span class="sidebar-link-icon"></span>
+                        My Entries
+                    </a>
+                    <a href="{% url 'create_weekly_report' %}" class="sidebar-link {% if request.resolver_match.url_name == 'create_weekly_report' %}active{% endif %}" id="nav-new-report">
+                        <span class="sidebar-link-icon"></span>
+                        New Weekly Report
+                    </a>
+                    <a href="{% url 'report_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'report_list' %}active{% endif %}" id="nav-reports">
+                        <span class="sidebar-link-icon"></span>
+                        Weekly Reports
+                    </a>
+                    <a href="{% url 'export_pdf' %}" class="sidebar-link" id="nav-export">
+                        <span class="sidebar-link-icon"></span>
+                        Export PDF
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if request.user.profile.role == 'supervisor' %}
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-section-title">Supervision</div>
+                    <a href="{% url 'entry_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'entry_list' %}active{% endif %}" id="nav-review-entries">
+                        <span class="sidebar-link-icon"></span>
+                        Student Entries
+                    </a>
+                    <a href="{% url 'report_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'report_list' %}active{% endif %}" id="nav-review-reports">
+                        <span class="sidebar-link-icon"></span>
+                        Weekly Reports
+                    </a>
+                </div>
+                {% endif %}
+
+                <div class="sidebar-nav-section">
+                    <div class="sidebar-nav-section-title">Account</div>
+                    <a href="{% url 'notifications' %}" class="sidebar-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" id="nav-notifications">
+                        <span class="sidebar-link-icon"></span>
+                        Notifications
+                        {% if unread_count %}
+                        <span class="sidebar-link-badge">{{ unread_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{% url 'profile' %}" class="sidebar-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" id="nav-profile">
+                        <span class="sidebar-link-icon"></span>
+                        Profile
+                    </a>
+                    <a href="{% url 'logout' %}" class="sidebar-link" id="nav-logout">
+                        <span class="sidebar-link-icon"></span>
+                        Logout
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-user">
+                <div class="sidebar-avatar">
+                    {{ request.user.first_name.0 }}{{ request.user.last_name.0 }}
+                </div>
+                <div class="sidebar-user-info">
+                    <strong>{{ request.user.get_full_name }}</strong>
+                    <span>{{ request.user.profile.role }}</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="mobile-toggle" onclick="toggleSidebar()" id="mobile-toggle-btn">☰</button>
+                    <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
+                <div class="header-actions">
+                    {% block header_actions %}{% endblock %}
+                </div>
+            </header>
+
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" id="alert-{{ forloop.counter }}">
+                    <span>{{ message }}</span>
+                    <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="main-body">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    {% endblock %}
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        // Auto-dismiss alerts after 5 seconds
+        document.querySelectorAll('.alert').forEach(function(alert) {
+            setTimeout(function() {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-10px)';
+                alert.style.transition = 'all 0.3s ease';
+                setTimeout(function() { alert.remove(); }, 300);
+            }, 5000);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

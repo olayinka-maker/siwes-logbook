@@ -1,0 +1,83 @@
+{% extends "siwes_logbook/base.html" %}
+
+{% block title %}Weekly Reports — SIWES Logbook{% endblock %}
+{% block page_title %}Weekly Reports{% endblock %}
+
+{% block header_actions %}
+{% if request.user.profile.role == 'student' %}
+<a href="{% url 'create_weekly_report' %}" class="btn btn-primary btn-sm" id="header-new-report-btn"> New Report</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <a href="{% url 'report_list' %}" class="filter-chip {% if not status_filter %}active{% endif %}">All</a>
+    <a href="{% url 'report_list' %}?status=pending" class="filter-chip {% if status_filter == 'pending' %}active{% endif %}"> Pending</a>
+    <a href="{% url 'report_list' %}?status=approved" class="filter-chip {% if status_filter == 'approved' %}active{% endif %}"> Approved</a>
+    <a href="{% url 'report_list' %}?status=rejected" class="filter-chip {% if status_filter == 'rejected' %}active{% endif %}"> Rejected</a>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding:0;">
+        {% if reports %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Week</th>
+                        <th>Period</th>
+                        {% if request.user.profile.role == 'supervisor' %}<th>Student</th>{% endif %}
+                        <th>Summary</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr>
+                        <td><strong>Week {{ report.week_number }}</strong></td>
+                        <td>{{ report.start_date|date:"M d" }} - {{ report.end_date|date:"M d" }}</td>
+                        {% if request.user.profile.role == 'supervisor' %}<td>{{ report.student.get_full_name }}</td>{% endif %}
+                        <td>{{ report.summary|truncatechars:40 }}</td>
+                        <td><span class="badge badge-{{ report.status }}">{{ report.get_status_display }}</span></td>
+                        <td>
+                            <a href="{% url 'report_detail' report.pk %}" class="btn btn-ghost btn-sm">View →</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if reports.has_other_pages %}
+        <div class="pagination">
+            {% if reports.has_previous %}
+            <a href="?page={{ reports.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">←</a>
+            {% endif %}
+            {% for num in reports.paginator.page_range %}
+                {% if reports.number == num %}
+                <span class="current">{{ num }}</span>
+                {% elif num > reports.number|add:'-3' and num < reports.number|add:'3' %}
+                <a href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if reports.has_next %}
+            <a href="?page={{ reports.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">→</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"></div>
+            <h3>No reports found</h3>
+            <p>{% if status_filter %}No {{ status_filter }} reports.{% else %}Submit your weekly training summary.{% endif %}</p>
+            {% if request.user.profile.role == 'student' %}
+            <a href="{% url 'create_weekly_report' %}" class="btn btn-primary">Create Weekly Report</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

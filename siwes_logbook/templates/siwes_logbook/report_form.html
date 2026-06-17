@@ -1,0 +1,88 @@
+{% extends "siwes_logbook/base.html" %}
+
+{% block title %}{% if editing %}Edit Report{% else %}New Weekly Report{% endif %} — SIWES Logbook{% endblock %}
+{% block page_title %}{% if editing %}Edit Weekly Report{% else %}New Weekly Report{% endif %}{% endblock %}
+
+{% block content %}
+<div style="max-width:800px;">
+    <div class="card">
+        <div class="card-header">
+            <h3>{% if editing %} Edit Weekly Report{% else %} Submit Weekly Report{% endif %}</h3>
+        </div>
+        <div class="card-body">
+            {% if form.errors %}
+            <div class="alert alert-danger" style="margin-bottom:20px;">
+                <span>Please correct the errors below.</span>
+                <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+            </div>
+            {% endif %}
+
+            <form method="post" id="report-form">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_week_number">Week Number *</label>
+                        <input type="number" name="week_number" id="id_week_number" class="form-control"
+                               value="{{ form.week_number.value }}" min="1" required>
+                        {{ form.week_number.errors }}
+                    </div>
+                    <div class="form-group">
+                        <!-- spacer for layout -->
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_start_date">Week Start Date *</label>
+                        <input type="date" name="start_date" id="id_start_date" class="form-control"
+                               value="{{ form.start_date.value|date:'Y-m-d' }}" required>
+                        {{ form.start_date.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_end_date">Week End Date *</label>
+                        <input type="date" name="end_date" id="id_end_date" class="form-control"
+                               value="{{ form.end_date.value|date:'Y-m-d' }}" required>
+                        {{ form.end_date.errors }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_summary">Weekly Summary *</label>
+                    <textarea name="summary" id="id_summary" class="form-control" rows="5"
+                              placeholder="Overall summary of this week's activities..." required>{{ form.summary.value|default:'' }}</textarea>
+                    {{ form.summary.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_achievements">Key Achievements</label>
+                    <textarea name="achievements" id="id_achievements" class="form-control" rows="4"
+                              placeholder="Key achievements, milestones and successes this week...">{{ form.achievements.value|default:'' }}</textarea>
+                    {{ form.achievements.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_problems_encountered">Problems Encountered</label>
+                    <textarea name="problems_encountered" id="id_problems_encountered" class="form-control" rows="4"
+                              placeholder="Problems you encountered and how you addressed them...">{{ form.problems_encountered.value|default:'' }}</textarea>
+                    {{ form.problems_encountered.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_plans_for_next_week">Plans for Next Week</label>
+                    <textarea name="plans_for_next_week" id="id_plans_for_next_week" class="form-control" rows="4"
+                              placeholder="Your objectives and plans for the coming week...">{{ form.plans_for_next_week.value|default:'' }}</textarea>
+                    {{ form.plans_for_next_week.errors }}
+                </div>
+
+                <div style="display:flex;gap:12px;margin-top:24px;">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submit-report-btn">
+                        {% if editing %} Update Report{% else %} Submit Report{% endif %}
+                    </button>
+                    <a href="{% url 'report_list' %}" class="btn btn-outline btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

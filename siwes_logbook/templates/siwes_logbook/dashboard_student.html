@@ -1,0 +1,140 @@
+{% extends "siwes_logbook/base.html" %}
+
+{% block title %}Student Dashboard — SIWES Logbook{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'create_entry' %}" class="btn btn-primary btn-sm" id="header-new-entry-btn"> New Entry</a>
+{% endblock %}
+
+{% block content %}
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card primary-accent">
+        <div class="stat-icon primary"></div>
+        <div class="stat-content">
+            <h4>Total Entries</h4>
+            <div class="stat-number">{{ total_entries }}</div>
+        </div>
+    </div>
+    <div class="stat-card success-accent">
+        <div class="stat-icon success"></div>
+        <div class="stat-content">
+            <h4>Approved</h4>
+            <div class="stat-number">{{ approved_entries }}</div>
+        </div>
+    </div>
+    <div class="stat-card warning-accent">
+        <div class="stat-icon warning"></div>
+        <div class="stat-content">
+            <h4>Pending</h4>
+            <div class="stat-number">{{ pending_entries }}</div>
+        </div>
+    </div>
+    <div class="stat-card danger-accent">
+        <div class="stat-icon danger"></div>
+        <div class="stat-content">
+            <h4>Rejected</h4>
+            <div class="stat-number">{{ rejected_entries }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="content-grid">
+    <!-- Recent Entries -->
+    <div class="card">
+        <div class="card-header">
+            <h3> Recent Entries</h3>
+            <a href="{% url 'entry_list' %}" class="btn btn-ghost btn-sm">View All →</a>
+        </div>
+        <div class="card-body" style="padding:0;">
+            {% if recent_entries %}
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in recent_entries %}
+                        <tr onclick="window.location='{% url 'entry_detail' entry.pk %}'" style="cursor:pointer;">
+                            <td>{{ entry.date|date:"M d, Y" }}</td>
+                            <td><strong>{{ entry.title|truncatechars:40 }}</strong></td>
+                            <td><span class="badge badge-{{ entry.status }}">{{ entry.get_status_display }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"></div>
+                <h3>No entries yet</h3>
+                <p>Start recording your daily activities</p>
+                <a href="{% url 'create_entry' %}" class="btn btn-primary">Create First Entry</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Info -->
+    <div class="card">
+        <div class="card-header">
+            <h3> Quick Info</h3>
+        </div>
+        <div class="card-body">
+            <div style="margin-bottom:16px;">
+                <div class="text-small text-muted mb-1">Training Company</div>
+                <strong>{{ profile.company_name|default:"Not specified" }}</strong>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div class="text-small text-muted mb-1">Department</div>
+                <strong>{{ profile.department|default:"Not specified" }}</strong>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div class="text-small text-muted mb-1">Institution</div>
+                <strong>{{ profile.institution|default:"Not specified" }}</strong>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div class="text-small text-muted mb-1">Matric Number</div>
+                <strong>{{ profile.matric_number|default:"Not specified" }}</strong>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div class="text-small text-muted mb-1">Weekly Reports</div>
+                <strong>{{ total_reports }} submitted ({{ approved_reports }} approved)</strong>
+            </div>
+
+            <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
+                <a href="{% url 'create_entry' %}" class="btn btn-primary btn-sm"> New Entry</a>
+                <a href="{% url 'create_weekly_report' %}" class="btn btn-outline btn-sm"> Weekly Report</a>
+                <a href="{% url 'export_pdf' %}" class="btn btn-outline btn-sm"> Export PDF</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications -->
+{% if notifications %}
+<div class="card mt-3">
+    <div class="card-header">
+        <h3> Recent Notifications</h3>
+        <a href="{% url 'notifications' %}" class="btn btn-ghost btn-sm">View All →</a>
+    </div>
+    <div class="card-body" style="padding:0;">
+        {% for notif in notifications %}
+        <a href="{% url 'mark_notification_read' notif.pk %}" class="notification-item unread" style="text-decoration:none;color:inherit;">
+            <div class="notification-dot {{ notif.notification_type }}"></div>
+            <div class="notification-content">
+                <h4>{{ notif.title }}</h4>
+                <p>{{ notif.message|truncatechars:80 }}</p>
+                <span class="notification-time">{{ notif.created_at|timesince }} ago</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

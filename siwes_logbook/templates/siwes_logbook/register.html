@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Register for a SIWES Logbook {{ role }} account.">
+    <title>Register as {{ role }} — SIWES Logbook</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-card" style="max-width:600px;">
+            <div class="auth-card-header">
+                <div class="auth-card-logo"></div>
+                <h2>{{ role }} Registration</h2>
+                <p>Create your {{ role|lower }} account to get started</p>
+            </div>
+
+            {% if form.errors %}
+            <div class="alert alert-danger" style="margin-bottom:16px;">
+                <span>Please fix the errors below.</span>
+                <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+            </div>
+            {% endif %}
+
+            <form method="post" id="register-form">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_first_name">First Name *</label>
+                        <input type="text" name="first_name" id="id_first_name" class="form-control"
+                               placeholder="First Name" value="{{ form.first_name.value|default:'' }}" required>
+                        {{ form.first_name.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_last_name">Last Name *</label>
+                        <input type="text" name="last_name" id="id_last_name" class="form-control"
+                               placeholder="Last Name" value="{{ form.last_name.value|default:'' }}" required>
+                        {{ form.last_name.errors }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_username">Username *</label>
+                        <input type="text" name="username" id="id_username" class="form-control"
+                               placeholder="Choose a username" value="{{ form.username.value|default:'' }}" required>
+                        {{ form.username.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_email">Email Address *</label>
+                        <input type="email" name="email" id="id_email" class="form-control"
+                               placeholder="Email Address" value="{{ form.email.value|default:'' }}" required>
+                        {{ form.email.errors }}
+                    </div>
+                </div>
+
+                {% if role == 'Student' %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_matric_number">Matric Number *</label>
+                        <input type="text" name="matric_number" id="id_matric_number" class="form-control"
+                               placeholder="e.g. CSC/2020/001" value="{{ form.matric_number.value|default:'' }}" required>
+                        {{ form.matric_number.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_phone">Phone Number</label>
+                        <input type="text" name="phone" id="id_phone" class="form-control"
+                               placeholder="Phone Number" value="{{ form.phone.value|default:'' }}">
+                    </div>
+                </div>
+                {% else %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_staff_id">Staff ID *</label>
+                        <input type="text" name="staff_id" id="id_staff_id" class="form-control"
+                               placeholder="Staff ID" value="{{ form.staff_id.value|default:'' }}" required>
+                        {{ form.staff_id.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_phone">Phone Number</label>
+                        <input type="text" name="phone" id="id_phone" class="form-control"
+                               placeholder="Phone Number" value="{{ form.phone.value|default:'' }}">
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_department">Department *</label>
+                        <input type="text" name="department" id="id_department" class="form-control"
+                               placeholder="e.g. Computer Science" value="{{ form.department.value|default:'' }}" required>
+                        {{ form.department.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_institution">Institution *</label>
+                        <input type="text" name="institution" id="id_institution" class="form-control"
+                               placeholder="e.g. University of Lagos" value="{{ form.institution.value|default:'' }}" required>
+                        {{ form.institution.errors }}
+                    </div>
+                </div>
+
+                {% if role == 'Student' %}
+                <div class="form-group">
+                    <label for="id_company_name">Company/Organization Name</label>
+                    <input type="text" name="company_name" id="id_company_name" class="form-control"
+                           placeholder="Where you are doing your IT" value="{{ form.company_name.value|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_company_address">Company Address</label>
+                    <textarea name="company_address" id="id_company_address" class="form-control" rows="2"
+                              placeholder="Company Address">{{ form.company_address.value|default:'' }}</textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_training_start_date">Training Start Date</label>
+                        <input type="date" name="training_start_date" id="id_training_start_date" class="form-control"
+                               value="{{ form.training_start_date.value|default:'' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_training_end_date">Training End Date</label>
+                        <input type="date" name="training_end_date" id="id_training_end_date" class="form-control"
+                               value="{{ form.training_end_date.value|default:'' }}">
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_password1">Password *</label>
+                        <input type="password" name="password1" id="id_password1" class="form-control"
+                               placeholder="Create Password" required>
+                        {{ form.password1.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_password2">Confirm Password *</label>
+                        <input type="password" name="password2" id="id_password2" class="form-control"
+                               placeholder="Confirm Password" required>
+                        {{ form.password2.errors }}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:8px;" id="register-submit-btn">
+                    Create {{ role }} Account
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="{% url 'login' %}">Sign In</a></p>
+                {% if role == 'Student' %}
+                <p style="margin-top:6px;"><a href="{% url 'register_supervisor' %}">Register as Supervisor instead</a></p>
+                {% else %}
+                <p style="margin-top:6px;"><a href="{% url 'register_student' %}">Register as Student instead</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

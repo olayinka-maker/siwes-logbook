@@ -1,0 +1,183 @@
+{% extends "siwes_logbook/base.html" %}
+
+{% block title %}Supervisor Dashboard — SIWES Logbook{% endblock %}
+{% block page_title %}Supervisor Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card primary-accent">
+        <div class="stat-icon primary"></div>
+        <div class="stat-content">
+            <h4>Assigned Students</h4>
+            <div class="stat-number">{{ student_count }}</div>
+        </div>
+    </div>
+    <div class="stat-card warning-accent">
+        <div class="stat-icon warning"></div>
+        <div class="stat-content">
+            <h4>Pending Entries</h4>
+            <div class="stat-number">{{ pending_entries_count }}</div>
+        </div>
+    </div>
+    <div class="stat-card info-accent">
+        <div class="stat-icon info"></div>
+        <div class="stat-content">
+            <h4>Pending Reports</h4>
+            <div class="stat-number">{{ pending_reports_count }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="content-grid">
+    <!-- Pending Entries -->
+    <div class="card">
+        <div class="card-header">
+            <h3> Entries Awaiting Review</h3>
+            <a href="{% url 'entry_list' %}?status=pending" class="btn btn-ghost btn-sm">View All →</a>
+        </div>
+        <div class="card-body" style="padding:0;">
+            {% if pending_entries %}
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Date</th>
+                            <th>Title</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in pending_entries %}
+                        <tr>
+                            <td><strong>{{ entry.student.get_full_name }}</strong></td>
+                            <td>{{ entry.date|date:"M d" }}</td>
+                            <td>{{ entry.title|truncatechars:30 }}</td>
+                            <td><a href="{% url 'entry_detail' entry.pk %}" class="btn btn-primary btn-sm">Review</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding:40px 20px;">
+                <div class="empty-icon"></div>
+                <h3>All caught up!</h3>
+                <p>No pending entries to review</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pending Reports -->
+    <div class="card">
+        <div class="card-header">
+            <h3> Reports Awaiting Review</h3>
+            <a href="{% url 'report_list' %}?status=pending" class="btn btn-ghost btn-sm">View All →</a>
+        </div>
+        <div class="card-body" style="padding:0;">
+            {% if pending_reports %}
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Week</th>
+                            <th>Period</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in pending_reports %}
+                        <tr>
+                            <td><strong>{{ report.student.get_full_name }}</strong></td>
+                            <td>Week {{ report.week_number }}</td>
+                            <td>{{ report.start_date|date:"M d" }} - {{ report.end_date|date:"M d" }}</td>
+                            <td><a href="{% url 'report_detail' report.pk %}" class="btn btn-primary btn-sm">Review</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding:40px 20px;">
+                <div class="empty-icon"></div>
+                <h3>All caught up!</h3>
+                <p>No pending reports to review</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Assigned Students -->
+{% if assigned_students %}
+<div class="card mt-3">
+    <div class="card-header">
+        <h3> Your Students</h3>
+    </div>
+    <div class="card-body" style="padding:0;">
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Matric No.</th>
+                        <th>Department</th>
+                        <th>Company</th>
+                        <th>Entries</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student_profile in assigned_students %}
+                    <tr>
+                        <td><strong>{{ student_profile.user.get_full_name }}</strong></td>
+                        <td>{{ student_profile.matric_number }}</td>
+                        <td>{{ student_profile.department }}</td>
+                        <td>{{ student_profile.company_name|default:"—" }}</td>
+                        <td>{{ student_profile.total_entries }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recently Reviewed -->
+{% if recently_reviewed %}
+<div class="card mt-3">
+    <div class="card-header">
+        <h3> Recently Reviewed</h3>
+    </div>
+    <div class="card-body" style="padding:0;">
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Reviewed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in recently_reviewed %}
+                    <tr onclick="window.location='{% url 'entry_detail' entry.pk %}'" style="cursor:pointer;">
+                        <td>{{ entry.student.get_full_name }}</td>
+                        <td>{{ entry.date|date:"M d" }}</td>
+                        <td>{{ entry.title|truncatechars:30 }}</td>
+                        <td><span class="badge badge-{{ entry.status }}">{{ entry.get_status_display }}</span></td>
+                        <td>{{ entry.reviewed_at|timesince }} ago</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

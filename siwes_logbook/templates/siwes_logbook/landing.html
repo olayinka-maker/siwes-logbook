@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIWES Logbook System — A comprehensive industrial training logbook management platform for Nigerian universities.">
+    <title>SIWES Logbook System — Industrial Training Made Easy</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="landing-page">
+        <!-- Navigation -->
+        <nav class="landing-nav">
+            <div class="landing-logo">
+                <div class="landing-logo-icon"></div>
+                <h1>SIWES Logbook</h1>
+            </div>
+            <div class="landing-nav-links">
+                <a href="{% url 'login' %}" class="btn-login">Log In</a>
+                <a href="{% url 'register_student' %}" class="btn-register">Get Started</a>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="landing-hero">
+            <div class="hero-content">
+                <span class="hero-badge"> Built for Nigerian Universities</span>
+                <h1>Your Digital SIWES Logbook, Simplified</h1>
+                <p>
+                    Record daily activities, submit weekly reports, upload evidence photos,
+                    and get supervisor approvals — all in one beautiful platform.
+                    Export your complete logbook as a professional PDF anytime.
+                </p>
+                <div class="hero-actions">
+                    <a href="{% url 'register_student' %}" class="btn-hero-primary">Register as Student</a>
+                    <a href="{% url 'register_supervisor' %}" class="btn-hero-secondary">Register as Supervisor</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="landing-features">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"></div>
+                    <h3>Daily Logbook Entries</h3>
+                    <p>Record your daily activities, skills acquired, and challenges faced during your industrial training.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"></div>
+                    <h3>Upload Evidence</h3>
+                    <p>Attach photos and files as evidence of your work activities. Keep a visual record of your training.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"></div>
+                    <h3>Supervisor Approval</h3>
+                    <p>Supervisors can review, approve, or request changes on entries with detailed comments.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"></div>
+                    <h3>Weekly Reports</h3>
+                    <p>Submit comprehensive weekly summaries with achievements, challenges, and plans for the next week.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"></div>
+                    <h3>Export PDF Reports</h3>
+                    <p>Generate a professional, formatted PDF of your complete logbook ready for submission.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"></div>
+                    <h3>Real-time Notifications</h3>
+                    <p>Stay updated with instant notifications when entries are reviewed or approved.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="landing-footer">
+            <p>&copy; 2026 SIWES Logbook System. Built for Nigerian Students & Supervisors.</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,123 @@
+{% extends "siwes_logbook/base.html" %}
+
+{% block title %}Entry: {{ entry.title }} — SIWES Logbook{% endblock %}
+{% block page_title %}Entry Details{% endblock %}
+
+{% block header_actions %}
+{% if request.user.profile.role == 'student' and entry.status != 'approved' %}
+<a href="{% url 'edit_entry' entry.pk %}" class="btn btn-outline btn-sm"> Edit</a>
+{% endif %}
+<a href="{% url 'entry_list' %}" class="btn btn-ghost btn-sm">← Back to Entries</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:900px;">
+    <div class="card">
+        <div class="card-body">
+            <!-- Header -->
+            <div class="detail-header">
+                <div>
+                    <h2 style="font-size:22px;margin-bottom:6px;">{{ entry.title }}</h2>
+                    <div class="detail-meta">
+                        <span class="detail-meta-item"><span class="icon">📅</span> {{ entry.date|date:"l, F d, Y" }}</span>
+                        <span class="detail-meta-item"><span class="icon"></span> Day {{ entry.day_number }}, Week {{ entry.week_number }}</span>
+                        {% if request.user.profile.role == 'supervisor' %}
+                        <span class="detail-meta-item"><span class="icon"></span> {{ entry.student.get_full_name }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="badge badge-{{ entry.status }}" style="font-size:14px;padding:6px 16px;">{{ entry.get_status_display }}</span>
+            </div>
+
+            <!-- Activities -->
+            <div class="detail-section">
+                <h4> Activities Carried Out</h4>
+                <p>{{ entry.activities|linebreaksbr }}</p>
+            </div>
+
+            <!-- Skills -->
+            {% if entry.skills_acquired %}
+            <div class="detail-section">
+                <h4> Skills Acquired</h4>
+                <p>{{ entry.skills_acquired|linebreaksbr }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Challenges -->
+            {% if entry.challenges %}
+            <div class="detail-section">
+                <h4> Challenges Faced</h4>
+                <p>{{ entry.challenges|linebreaksbr }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Evidence -->
+            {% if evidence %}
+            <div class="detail-section">
+                <h4> Evidence / Attachments</h4>
+                <div class="evidence-grid">
+                    {% for ev in evidence %}
+                    <div class="evidence-item">
+                        {% if ev.is_image %}
+                        <a href="{{ ev.file.url }}" target="_blank">
+                            <img src="{{ ev.file.url }}" alt="{{ ev.caption }}">
+                        </a>
+                        {% else %}
+                        <a href="{{ ev.file.url }}" target="_blank" style="display:block;">
+                            <div style="height:160px;display:flex;align-items:center;justify-content:center;background:var(--gray-100);font-size:40px;"></div>
+                        </a>
+                        {% endif %}
+                        <div class="evidence-item-info">
+                            <span>{{ ev.filename }}</span>
+                            {% if request.user == entry.student and entry.status != 'approved' %}
+                            <a href="{% url 'delete_evidence' ev.pk %}" class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="return confirm('Remove this file?')">✕</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Supervisor Comment -->
+            {% if entry.supervisor_comment %}
+            <div class="detail-section" style="background:var(--gray-50);border-radius:var(--radius-md);padding:20px;margin-top:16px;">
+                <h4> Supervisor Comment</h4>
+                <p>{{ entry.supervisor_comment|linebreaksbr }}</p>
+                {% if entry.reviewed_by %}
+                <p class="text-small text-muted mt-1">— {{ entry.reviewed_by.get_full_name }}, {{ entry.reviewed_at|date:"M d, Y H:i" }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Supervisor Review Panel -->
+    {% if review_form %}
+    <div class="review-panel">
+        <h3> Review This Entry</h3>
+        <form method="post" id="review-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Decision</label>
+                <div class="radio-group">
+                    <label class="radio-option approve">
+                        <input type="radio" name="status" value="approved">  Approve
+                    </label>
+                    <label class="radio-option reject">
+                        <input type="radio" name="status" value="rejected">  Reject
+                    </label>
+                </div>
+                {{ review_form.status.errors }}
+            </div>
+            <div class="form-group">
+                <label for="id_supervisor_comment">Comment</label>
+                <textarea name="supervisor_comment" id="id_supervisor_comment" class="form-control" rows="4"
+                          placeholder="Add your comments here (required if rejecting)..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="submit-review-btn">Submit Review</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

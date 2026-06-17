@@ -1,0 +1,84 @@
+{% extends "siwes_logbook/base.html" %}
+
+{% block title %}Daily Entries — SIWES Logbook{% endblock %}
+{% block page_title %}Daily Entries{% endblock %}
+
+{% block header_actions %}
+{% if request.user.profile.role == 'student' %}
+<a href="{% url 'create_entry' %}" class="btn btn-primary btn-sm" id="header-new-entry-btn"> New Entry</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <a href="{% url 'entry_list' %}" class="filter-chip {% if not status_filter %}active{% endif %}">All</a>
+    <a href="{% url 'entry_list' %}?status=pending" class="filter-chip {% if status_filter == 'pending' %}active{% endif %}"> Pending</a>
+    <a href="{% url 'entry_list' %}?status=approved" class="filter-chip {% if status_filter == 'approved' %}active{% endif %}"> Approved</a>
+    <a href="{% url 'entry_list' %}?status=rejected" class="filter-chip {% if status_filter == 'rejected' %}active{% endif %}"> Rejected</a>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding:0;">
+        {% if entries %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Date</th>
+                        {% if request.user.profile.role == 'supervisor' %}<th>Student</th>{% endif %}
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                    <tr>
+                        <td><strong>Day {{ entry.day_number }}</strong></td>
+                        <td>{{ entry.date|date:"M d, Y" }}</td>
+                        {% if request.user.profile.role == 'supervisor' %}<td>{{ entry.student.get_full_name }}</td>{% endif %}
+                        <td>{{ entry.title|truncatechars:45 }}</td>
+                        <td><span class="badge badge-{{ entry.status }}">{{ entry.get_status_display }}</span></td>
+                        <td>
+                            <a href="{% url 'entry_detail' entry.pk %}" class="btn btn-ghost btn-sm">View →</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if entries.has_other_pages %}
+        <div class="pagination">
+            {% if entries.has_previous %}
+            <a href="?page={{ entries.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">←</a>
+            {% endif %}
+            {% for num in entries.paginator.page_range %}
+                {% if entries.number == num %}
+                <span class="current">{{ num }}</span>
+                {% elif num > entries.number|add:'-3' and num < entries.number|add:'3' %}
+                <a href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if entries.has_next %}
+            <a href="?page={{ entries.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">→</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"></div>
+            <h3>No entries found</h3>
+            <p>{% if status_filter %}No {{ status_filter }} entries. Try a different filter.{% else %}Start recording your daily activities.{% endif %}</p>
+            {% if request.user.profile.role == 'student' %}
+            <a href="{% url 'create_entry' %}" class="btn btn-primary">Create First Entry</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "siwes_logbook/base.html" %}
+
+{% block title %}{% if editing %}Edit Entry{% else %}New Daily Entry{% endif %} — SIWES Logbook{% endblock %}
+{% block page_title %}{% if editing %}Edit Entry{% else %}New Daily Entry{% endif %}{% endblock %}
+
+{% block content %}
+<div style="max-width:800px;">
+    <div class="card">
+        <div class="card-header">
+            <h3>{% if editing %} Edit Logbook Entry{% else %} Record Today's Activities{% endif %}</h3>
+        </div>
+        <div class="card-body">
+            {% if form.errors %}
+            <div class="alert alert-danger" style="margin-bottom:20px;">
+                <span>Please correct the errors below.</span>
+                <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+            </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" id="entry-form">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_date">Date *</label>
+                        <input type="date" name="date" id="id_date" class="form-control"
+                               value="{{ form.date.value|date:'Y-m-d' }}" required>
+                        {{ form.date.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_day_number">Day Number</label>
+                        <input type="number" name="day_number" id="id_day_number" class="form-control"
+                               value="{{ form.day_number.value }}" min="1">
+                        {{ form.day_number.errors }}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_week_number">Week Number</label>
+                        <input type="number" name="week_number" id="id_week_number" class="form-control"
+                               value="{{ form.week_number.value }}" min="1">
+                        {{ form.week_number.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_title">Title *</label>
+                        <input type="text" name="title" id="id_title" class="form-control"
+                               placeholder="Brief title of today's activities" value="{{ form.title.value|default:'' }}" required>
+                        {{ form.title.errors }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_activities">Activities Carried Out *</label>
+                    <textarea name="activities" id="id_activities" class="form-control" rows="5"
+                              placeholder="Describe in detail the activities you carried out today..." required>{{ form.activities.value|default:'' }}</textarea>
+                    {{ form.activities.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_skills_acquired">Skills Acquired</label>
+                    <textarea name="skills_acquired" id="id_skills_acquired" class="form-control" rows="4"
+                              placeholder="List the skills, tools, technologies or knowledge you gained today...">{{ form.skills_acquired.value|default:'' }}</textarea>
+                    {{ form.skills_acquired.errors }}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_challenges">Challenges Faced</label>
+                    <textarea name="challenges" id="id_challenges" class="form-control" rows="4"
+                              placeholder="Describe any challenges you faced and how you overcame them...">{{ form.challenges.value|default:'' }}</textarea>
+                    {{ form.challenges.errors }}
+                </div>
+
+                <!-- Evidence Upload -->
+                <div class="form-group">
+                    <label>Upload Evidence (Photos/Files)</label>
+                    <div class="file-upload-zone" onclick="document.getElementById('evidence_files').click()">
+                        <div class="upload-icon"></div>
+                        <p>Click to upload evidence files</p>
+                        <p class="text-small text-muted mt-1">Supports images, PDFs, and documents</p>
+                    </div>
+                    <input type="file" name="evidence_files" id="evidence_files" multiple
+                           style="display:none;" accept="image/*,.pdf,.doc,.docx"
+                           onchange="showSelectedFiles(this)">
+                    <div id="selected-files" class="mt-1 text-small text-muted"></div>
+                </div>
+
+                {% if editing and entry.evidence.all %}
+                <div class="form-group">
+                    <label>Existing Evidence</label>
+                    <div class="evidence-grid">
+                        {% for ev in entry.evidence.all %}
+                        <div class="evidence-item">
+                            {% if ev.is_image %}
+                            <img src="{{ ev.file.url }}" alt="{{ ev.caption }}">
+                            {% else %}
+                            <div style="height:160px;display:flex;align-items:center;justify-content:center;background:var(--gray-100);font-size:40px;"></div>
+                            {% endif %}
+                            <div class="evidence-item-info">
+                                <span>{{ ev.filename }}</span>
+                                <a href="{% url 'delete_evidence' ev.pk %}" class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="return confirm('Remove this file?')">✕</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div style="display:flex;gap:12px;margin-top:24px;">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submit-entry-btn">
+                        {% if editing %} Update Entry{% else %} Submit Entry{% endif %}
+                    </button>
+                    <a href="{% url 'entry_list' %}" class="btn btn-outline btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showSelectedFiles(input) {
+    var container = document.getElementById('selected-files');
+    if (input.files.length > 0) {
+        var names = [];
+        for (var i = 0; i < input.files.length; i++) {
+            names.push(input.files[i].name);
+        }
+        container.innerHTML = '📎 ' + names.join(', ');
+    } else {
+        container.innerHTML = '';
+    }
+}
+</script>
+{% endblock %}

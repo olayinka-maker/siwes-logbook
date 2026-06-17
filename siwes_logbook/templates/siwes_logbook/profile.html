@@ -1,0 +1,115 @@
+{% extends "siwes_logbook/base.html" %}
+
+{% block title %}Profile — SIWES Logbook{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div style="max-width:800px;">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar-large">
+            {% if profile.profile_photo %}
+            <img src="{{ profile.profile_photo.url }}" alt="Profile Photo">
+            {% else %}
+            {{ request.user.first_name.0 }}{{ request.user.last_name.0 }}
+            {% endif %}
+        </div>
+        <div class="profile-info">
+            <h2>{{ request.user.get_full_name }}</h2>
+            <p style="text-transform:capitalize;">{{ profile.role }} · {{ profile.department }}</p>
+            <p>{{ profile.institution }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3> Edit Profile</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" id="profile-form">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_first_name">First Name</label>
+                        <input type="text" name="first_name" id="id_first_name" class="form-control"
+                               value="{{ request.user.first_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_last_name">Last Name</label>
+                        <input type="text" name="last_name" id="id_last_name" class="form-control"
+                               value="{{ request.user.last_name }}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_email">Email</label>
+                        <input type="email" name="email" id="id_email" class="form-control"
+                               value="{{ request.user.email }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_phone">Phone</label>
+                        <input type="text" name="phone" id="id_phone" class="form-control"
+                               value="{{ profile.phone }}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_department">Department</label>
+                        <input type="text" name="department" id="id_department" class="form-control"
+                               value="{{ profile.department }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_institution">Institution</label>
+                        <input type="text" name="institution" id="id_institution" class="form-control"
+                               value="{{ profile.institution }}">
+                    </div>
+                </div>
+
+                {% if profile.role == 'student' %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_company_name">Company Name</label>
+                        <input type="text" name="company_name" id="id_company_name" class="form-control"
+                               value="{{ profile.company_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_profile_photo">Profile Photo</label>
+                        <input type="file" name="profile_photo" id="id_profile_photo" class="form-control"
+                               accept="image/*">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_company_address">Company Address</label>
+                    <textarea name="company_address" id="id_company_address" class="form-control" rows="2">{{ profile.company_address }}</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_training_start_date">Training Start</label>
+                        <input type="date" name="training_start_date" id="id_training_start_date" class="form-control"
+                               value="{{ profile.training_start_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_training_end_date">Training End</label>
+                        <input type="date" name="training_end_date" id="id_training_end_date" class="form-control"
+                               value="{{ profile.training_end_date|date:'Y-m-d' }}">
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="id_bio">Bio</label>
+                    <textarea name="bio" id="id_bio" class="form-control" rows="3"
+                              placeholder="Tell us a little about yourself...">{{ profile.bio }}</textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" id="save-profile-btn"> Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
